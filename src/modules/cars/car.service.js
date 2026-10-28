@@ -8,8 +8,9 @@ const normalizePlate = (plate) => plate.toUpperCase().replace('-', '');
 const equalsIgnoreCase = (a, b) => a.toLowerCase() === b.toLowerCase();
 
 class CarService {
-  constructor(carRepository) {
+  constructor(carRepository, usageRepository) {
     this.carRepository = carRepository;
+    this.usageRepository = usageRepository;
   }
 
   create(data) {
@@ -30,6 +31,11 @@ class CarService {
 
   delete(id) {
     this.getById(id);
+
+    if (this.usageRepository.existsByCar(id)) {
+      throw new ConflictError('Automóvel possui registros de utilização e não pode ser excluído');
+    }
+
     this.carRepository.delete(id);
   }
 

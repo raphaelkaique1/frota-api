@@ -1,9 +1,10 @@
-const { NotFoundError } = require('../../errors');
+const { NotFoundError, ConflictError } = require('../../errors');
 const { requireString } = require('../../shared/validators');
 
 class DriverService {
-  constructor(driverRepository) {
+  constructor(driverRepository, usageRepository) {
     this.driverRepository = driverRepository;
+    this.usageRepository = usageRepository;
   }
 
   create(data) {
@@ -17,6 +18,11 @@ class DriverService {
 
   delete(id) {
     this.getById(id);
+
+    if (this.usageRepository.existsByDriver(id)) {
+      throw new ConflictError('Motorista possui registros de utilização e não pode ser excluído');
+    }
+
     this.driverRepository.delete(id);
   }
 
